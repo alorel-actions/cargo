@@ -1,0 +1,23 @@
+name: cargo-rdme
+description: Run the cargo-rdme --check command
+inputs:
+  working-directory:
+    description: Run in the specified directory
+  version:
+    description: Version to install.
+    default: ^1
+branding:
+  icon: activity
+  color: orange
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/cargo-dep
+      name: Install
+      with:
+        name: cargo-rdme
+        version: ${{ inputs.version }}
+    - name: Run check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo-rdme --check

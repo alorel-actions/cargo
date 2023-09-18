@@ -1,0 +1,37 @@
+name: Release
+description: Release to crates.io & GitHub releases
+inputs:
+  version:
+    description: Version to release
+    required: true
+  changelog:
+    description: The changelog
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Commit version bump
+      shell: bash
+      run: 'git commit -m "Bump version to ${{ inputs.version }}"'
+    - name: Git tag
+      shell: bash
+      run: git tag "${{ inputs.version }}"
+    - name: Get last commit sha
+      shell: bash
+      id: last-commit
+      run: echo "sha=$(git log -n 1 --pretty=format:%H)" >> $GITHUB_OUTPUT
+    - name: Push commit
+      shell: bash
+      run: git push
+    - name: Push tag
+      shell: bash
+      run: git push --tags
+    - name: Create release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: false
+        prerelease: false
+        generateReleaseNotes: false
+        commit: ${{ steps.last-commit.outputs.sha }}
+        tag: ${{ inputs.version }}
+        body: ${{ inputs.changelog }}

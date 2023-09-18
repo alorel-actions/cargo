@@ -1,0 +1,57 @@
+name: Cargo init
+description: Shortcut for initialising Rust with caching
+inputs:
+  working-directory:
+    description: Run in the specified directory
+  toolchain:
+    description: Toolchain to install
+    required: true
+    default: stable
+  components:
+    description: Extra components to install
+  targets:
+    description: Extra targets to install
+  cache-prefix:
+    description: Prefix to apply to the cache key
+    default: cargo
+  local:
+    description: Set to true to include target/ in the cache and Cargo.lock in the cache key
+outputs:
+  cachekey:
+    description: Primary cache key
+    value: ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.local.outputs.hash }}
+branding:
+  icon: activity
+  color: orange
+runs:
+  using: composite
+  steps:
+    - name: Install toolchain
+      id: toolchain
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        components: ${{ inputs.components }}
+        targets: ${{ inputs.targets }}
+
+    - name: Local outputs
+      shell: bash
+      id: local
+      working-directory: ${{ inputs.working-directory }}
+      if: ${{ inputs.local == 'true' || inputs.local == 'TRUE' }}
+      run: >
+        echo "cache-target=target/" >> $GITHUB_OUTPUT &&
+        echo "hash=${{ hashFiles('**/Cargo.lock') }}-" >> $GITHUB_OUTPUT
+
+    - name: Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          ${{ steps.local.outputs.cache-target }}
+        key: ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.local.outputs.hash }}
+        restore-keys: |
+          ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-
