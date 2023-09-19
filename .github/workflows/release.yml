@@ -27,9 +27,10 @@ jobs:
         with:
           minor-types: |
             feat: Features
-            deps: Dependency updates
           patch-types: |
             fix: Bug Fixes
+            deps: Dependency updates
+            perf: Performance
           trivial-types: |
             chore: Maintenance
             ci: CI & Build
