@@ -20,12 +20,20 @@ branding:
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/cargo-dep
-      name: Install
-      with:
-        name: cargo-bump
-        version: ${{ inputs.cargo-bump-version }}
-        flags: --debug
+    - name: Echo args
+      shell: bash
+      if: ${{ inputs.cargo-bump-version }}
+      id: args
+      run: echo "args=--version ${{ inputs.cargo-bump-version }}" >> $GITHUB_OUTPUT
+    - name: Install
+      shell: bash
+      run: cargo install cargo-bump --debug ${{ steps.args.outputs.args }}
+      continue-on-error: true
+      id: install
+    - name: Check if it's installed
+      if: ${{ steps.install.outcome == 'failure' }}
+      shell: bash
+      run: which cargo-bump
     - name: Bump
       shell: bash
       working-directory: ${{ inputs.working-directory }}

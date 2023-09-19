@@ -12,11 +12,20 @@ branding:
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/cargo-dep
-      name: Install
-      with:
-        name: cargo-rdme
-        version: ${{ inputs.version }}
+    - name: Echo args
+      shell: bash
+      if: ${{ inputs.version }}
+      id: args
+      run: echo "args=--version ${{ inputs.version }}" >> $GITHUB_OUTPUT
+    - name: Install
+      shell: bash
+      run: cargo install cargo-rdme --debug ${{ steps.args.outputs.args }}
+      continue-on-error: true
+      id: install
+    - name: Check if it's installed
+      if: ${{ steps.install.outcome == 'failure' }}
+      shell: bash
+      run: which cargo-rdme
     - name: Run check
       shell: bash
       working-directory: ${{ inputs.working-directory }}
