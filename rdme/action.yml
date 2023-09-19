@@ -6,27 +6,32 @@ inputs:
   version:
     description: Version to install.
     default: ^1
+  no-fail-on-warnings:
+    description: Pass the `no-fail-on-warnings` flag
 branding:
   icon: activity
   color: orange
 runs:
   using: composite
   steps:
-    - name: Echo args
-      shell: bash
+    - shell: bash
       if: ${{ inputs.version }}
-      id: args
+      id: version
       run: echo "args=--version ${{ inputs.version }}" >> $GITHUB_OUTPUT
     - name: Install
       shell: bash
-      run: cargo install cargo-rdme --debug ${{ steps.args.outputs.args }}
+      run: cargo install cargo-rdme --debug ${{ steps.version.outputs.args }}
       continue-on-error: true
       id: install
     - name: Check if it's installed
       if: ${{ steps.install.outcome == 'failure' }}
       shell: bash
       run: which cargo-rdme
+    - shell: bash
+      if: ${{ inputs.no-fail-on-warnings == 'true' || inputs.no-fail-on-warnings == 'TRUE' }}
+      id: nfow
+      run: echo "args=--no-fail-on-warnings" >> $GITHUB_OUTPUT
     - name: Run check
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: cargo-rdme --check
+      run: cargo-rdme --check ${{ steps.nfow.outputs.args }}
