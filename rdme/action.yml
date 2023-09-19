@@ -1,0 +1,32 @@
+name: cargo-rdme
+description: Run the cargo-rdme --check command
+inputs:
+  working-directory:
+    description: Run in the specified directory
+  version:
+    description: Version to install.
+    default: ^1
+branding:
+  icon: activity
+  color: orange
+runs:
+  using: composite
+  steps:
+    - name: Echo args
+      shell: bash
+      if: ${{ inputs.version }}
+      id: args
+      run: echo "args=--version ${{ inputs.version }}" >> $GITHUB_OUTPUT
+    - name: Install
+      shell: bash
+      run: cargo install cargo-rdme --debug ${{ steps.args.outputs.args }}
+      continue-on-error: true
+      id: install
+    - name: Check if it's installed
+      if: ${{ steps.install.outcome == 'failure' }}
+      shell: bash
+      run: which cargo-rdme
+    - name: Run check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo-rdme --check
