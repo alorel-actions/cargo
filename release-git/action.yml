@@ -12,7 +12,13 @@ runs:
   steps:
     - name: Commit version bump
       shell: bash
-      run: 'git commit -m "Bump version to ${{ inputs.version }}"'
+      run: |
+        git commit -m "$(cat <<-END
+        Bump version to ${{ inputs.version }}
+        
+        [ci skip]
+        END
+        )"
     - name: Git tag
       shell: bash
       run: git tag "${{ inputs.version }}"

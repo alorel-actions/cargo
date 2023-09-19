@@ -12,8 +12,10 @@ types:
   - chore
   - deps
   - deps-dev
+  - perf
 scopes:
   - dev
+  - bump
   - init
   - rdme
-  - bump
+  - release-git
