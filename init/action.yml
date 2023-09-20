@@ -26,6 +26,9 @@ branding:
 runs:
   using: composite
   steps:
+    - name: Rm toolchain override
+      run: "if [ -f rust-toolchain.toml ]; then rm rust-toolchain.toml; fi"
+      shell: bash
     - name: Install toolchain
       id: toolchain
       uses: dtolnay/rust-toolchain@master
