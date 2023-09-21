@@ -19,3 +19,4 @@ scopes:
   - init
   - rdme
   - release-git
+  - wasm-bindgen

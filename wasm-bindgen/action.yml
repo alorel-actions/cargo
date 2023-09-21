@@ -1,0 +1,61 @@
+name: wasm-bindgen
+description: Install wasm-bindgen-cli and run it
+inputs:
+  working-directory:
+    description: Where the command will get run
+  wasm-bindgen-version:
+    description: wasm-bindgen version
+  force-version:
+    description: Force the version of wasm bindgen to match exactly
+    default: 'true'
+  input:
+    description: wasm-bindgen input relative to working directory
+    required: true
+  out-name:
+    description: --out-name
+  out-dir:
+    description: --out-dir
+  target:
+    description: --target
+    default: web
+    required: true
+  args:
+    description: Additional args to pass on to wasm-bindgen
+branding:
+  icon: activity
+  color: orange
+runs:
+  using: composite
+  steps:
+    - name: Install
+      uses: alorel-actions/cargo-global-dep@v1
+      with:
+        name: wasm-bindgen
+        version: ${{ inputs.wasm-bindgen-version }}
+        force-version: ${{ inputs.force-version }}
+
+    - id: out-name
+      shell: bash
+      if: ${{ inputs.out-name }}
+      run: echo "args=--out-name ${{ inputs.out-name }}" >> $GITHUB_OUTPUT
+
+    - id: out-dir
+      shell: bash
+      if: ${{ inputs.out-dir }}
+      run: echo "args=--out-dir ${{ inputs.out-dir }}" >> $GITHUB_OUTPUT
+
+    - id: target
+      shell: bash
+      if: ${{ inputs.target }}
+      run: echo "args=--target ${{ inputs.target }}" >> $GITHUB_OUTPUT
+
+    - name: Run
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: >
+        wasm-bindgen
+        ${{ steps.out-name.outputs.args }}
+        ${{ steps.out-dir.outputs.args }}
+        ${{ steps.target.outputs.args }}
+        ${{ inputs.args }}
+        ${{ inputs.input }}
