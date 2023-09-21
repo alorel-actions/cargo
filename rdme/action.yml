@@ -14,19 +14,11 @@ branding:
 runs:
   using: composite
   steps:
-    - shell: bash
-      if: ${{ inputs.version }}
-      id: version
-      run: echo "args=--version ${{ inputs.version }}" >> $GITHUB_OUTPUT
     - name: Install
-      shell: bash
-      run: cargo install cargo-rdme --debug ${{ steps.version.outputs.args }}
-      continue-on-error: true
-      id: install
-    - name: Check if it's installed
-      if: ${{ steps.install.outcome == 'failure' }}
-      shell: bash
-      run: which cargo-rdme
+      uses: alorel-actions/cargo-global-dep@v1
+      with:
+        name: cargo-rdme
+        version: ${{ inputs.version }}
     - shell: bash
       if: ${{ inputs.no-fail-on-warnings == 'true' || inputs.no-fail-on-warnings == 'TRUE' }}
       id: nfow
