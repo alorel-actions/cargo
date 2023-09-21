@@ -30,7 +30,8 @@ runs:
     - name: Install
       uses: alorel-actions/cargo-global-dep@v1
       with:
-        name: wasm-bindgen
+        name: wasm-bindgen-cli
+        binary-name: wasm-bindgen
         version: ${{ inputs.wasm-bindgen-version }}
         force-version: ${{ inputs.force-version }}
 
