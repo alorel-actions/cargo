@@ -26,7 +26,7 @@ branding:
 runs:
   using: composite
   steps:
-    - name: Rm toolchain override
+    - name: Rm toolchain override # the toolchain installation should dictate our Rust version
       run: "if [ -f rust-toolchain.toml ]; then rm rust-toolchain.toml; fi"
       shell: bash
     - name: Install toolchain
