@@ -28,7 +28,7 @@ runs:
     - name: Bump
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: cargo-bump ${{ inputs.release-type }} && git add Cargo.toml
+      run: cargo bump ${{ inputs.release-type }} && git add Cargo.toml
     - name: Sync
       shell: bash
       working-directory: ${{ inputs.root-directory }}
