@@ -1,0 +1,24 @@
+name: cargo-llvm-cov
+description: Run the cargo-llvm-cov command
+inputs:
+  working-directory:
+    description: Run in the specified directory
+  version:
+    description: Version to install.
+  args:
+    description: Additional args to pass
+branding:
+  icon: activity
+  color: orange
+runs:
+  using: composite
+  steps:
+    - name: Install
+      uses: alorel-actions/cargo-global-dep@v1
+      with:
+        name: cargo-llvm-cov
+        version: ${{ inputs.version }}
+    - name: Run check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: cargo llvm-cov ${{ inputs.args }}

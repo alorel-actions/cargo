@@ -17,6 +17,7 @@ scopes:
   - dev
   - bump
   - init
+  - llvm-cov
   - rdme
   - release-git
   - wasm-bindgen
