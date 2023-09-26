@@ -17,6 +17,7 @@ runs:
       uses: alorel-actions/cargo-global-dep@v1
       with:
         name: cargo-llvm-cov
+        release: true
         version: ${{ inputs.version }}
     - name: Run check
       shell: bash
