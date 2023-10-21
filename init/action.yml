@@ -14,6 +14,9 @@ inputs:
   cache-prefix:
     description: Prefix to apply to the cache key
     default: cargo
+  cache-suffix:
+    description: Suffix to apply to the cache key
+    required: false
   local:
     description: Set to true to include target/ in the cache and Cargo.lock in the cache key
 outputs:
@@ -55,6 +58,7 @@ runs:
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
           ${{ steps.local.outputs.cache-target }}
-        key: ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.local.outputs.hash }}
+        key: ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.local.outputs.hash }}-${{ inputs.cache-suffix }}
         restore-keys: |
+          ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-${{ steps.local.outputs.hash }}-
           ${{ inputs.cache-prefix }}-${{ runner.os }}-${{ steps.toolchain.outputs.cachekey }}-
