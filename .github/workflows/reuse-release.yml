@@ -1,0 +1,120 @@
+name: Release
+on:
+  workflow_call:
+    inputs:
+      toolchain:
+        description: Rust toolchain
+        type: string
+        default: stable
+      
+      minor-types:
+        description: Changelog minor types
+        type: string
+        default: "feat: Features"
+      
+      patch-types:
+        description: Changelog patch types
+        type: string
+        default: |
+          fix: Bug Fixes
+          perf: Performance
+      
+      trivial-types:
+        description: Changelog trivial types
+        type: string
+        default: |
+          chore: Maintenance
+          deps: Dependency updates
+          ci: CI & Build
+          build: CI & Build
+          refactor: Refactors
+          docs: Documentation
+    
+    secrets:
+      gh-token:
+        description: GitHub token capable of pushing to master
+        required: true
+      
+      crates-io-token:
+        description: crates.io token
+        required: true
+
+
+permissions:
+  contents: read
+
+env:
+  CARGO_INCREMENTAL: 0
+  RUSTFLAGS: --deny warnings
+
+jobs:
+  pre-release:
+    name: Pre-release
+    runs-on: ubuntu-latest
+    outputs:
+      should-release: ${{ steps.parse.outputs.should-release }}
+      release-type: ${{ steps.parse.outputs.release-type }}
+      next-version: ${{ steps.parse.outputs.next-version }}
+      changelog: ${{ steps.parse.outputs.changelog }}
+      issues-closed: ${{ steps.parse.outputs.issues-closed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.gh-token }}
+
+      - name: Parse
+        id: parse
+        uses: alorel-actions/semantic-release-lite@v0
+        with:
+          minor-types: ${{ inputs.minor-types }}
+          patch-types: ${{ inputs.patch-types }}
+          trivial-types: ${{ inputs.trivial-types }}
+  
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: pre-release
+    if: ${{ needs.pre-release.outputs.should-release }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.gh-token }}
+
+      - name: Git identity
+        uses: alorel-actions/git-ident@v1
+
+      - name: Init toolchain
+        uses: alorel-actions/cargo/init@v1
+        id: toolchain
+        with:
+          cache-prefix: release
+          toolchain: ${{ inputs.toolchain }}
+
+      - name: cargo-bump
+        uses: alorel-actions/cargo/bump@v1
+        with:
+          release-type: ${{ needs.pre-release.outputs.release-type }}
+
+      - name: Release on GitHub
+        uses: alorel-actions/cargo/release-git@v1
+        with:
+          version: ${{ needs.pre-release.outputs.next-version }}
+          changelog: ${{ needs.pre-release.outputs.changelog }}
+
+      - name: Publish crate
+        shell: bash
+        run: cargo publish --locked --token ${{ secrets.crates-io-token }}
+
+      - name: Notify
+        if: ${{ needs.pre-release.outputs.issues-closed }}
+        uses: alorel-actions/semantic-release-lite/notify@v0
+        with:
+          tag: ${{ needs.pre-release.outputs.next-version }}
+          issues: ${{ needs.pre-release.outputs.issues-closed }}
+          allow-out-of-sync: true
