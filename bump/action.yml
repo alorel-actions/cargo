@@ -11,9 +11,9 @@ inputs:
   sync-cmd:
     description: Cargo command used to sync the version change with Cargo.lock
     default: check --workspace
-  cargo-bump-version:
-    description: cargo-bump version
-    default: ^1
+  cargo-semver-version:
+    description: cargo-semver version
+    default: ^1.0.0-alpha.3
 branding:
   icon: activity
   color: orange
@@ -23,12 +23,12 @@ runs:
     - name: Install
       uses: alorel-actions/cargo-global-dep@v1
       with:
-        name: cargo-bump
-        version: ${{ inputs.cargo-bump-version }}
+        name: cargo-semver
+        version: ${{ inputs.cargo-semver-version }}
     - name: Bump
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: cargo bump ${{ inputs.release-type }} && git add Cargo.toml
+      run: cargo semver bump ${{ inputs.release-type }} && git add Cargo.toml
     - name: Sync
       shell: bash
       working-directory: ${{ inputs.root-directory }}
