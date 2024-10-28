@@ -90,19 +90,19 @@ jobs:
         uses: alorel-actions/git-ident@v1
 
       - name: Init toolchain
-        uses: alorel-actions/cargo/init@v1
+        uses: alorel-actions/cargo/init@v2
         id: toolchain
         with:
           cache-prefix: release
           toolchain: ${{ inputs.toolchain }}
 
       - name: cargo-bump
-        uses: alorel-actions/cargo/bump@v1
+        uses: alorel-actions/cargo/bump@v2
         with:
           release-type: ${{ needs.pre-release.outputs.release-type }}
 
       - name: Release on GitHub
-        uses: alorel-actions/cargo/release-git@v1
+        uses: alorel-actions/cargo/release-git@v2
         with:
           version: ${{ needs.pre-release.outputs.next-version }}
           changelog: ${{ needs.pre-release.outputs.changelog }}
