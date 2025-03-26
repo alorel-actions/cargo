@@ -47,7 +47,7 @@ runs:
       if: ${{ inputs.local == 'true' || inputs.local == 'TRUE' }}
       run: >
         echo "cache-target=target/" >> $GITHUB_OUTPUT &&
-        echo "hash=${{ hashFiles('**/Cargo.lock') }}-" >> $GITHUB_OUTPUT
+        echo "hash=${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}-" >> $GITHUB_OUTPUT
 
     - name: Cache
       uses: actions/cache@v4
